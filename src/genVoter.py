@@ -11,6 +11,7 @@ def genVotante(*args) -> list(voter.Voter):
   p = argparse.ArgumentParser()
   p.add_argument('-f', type=str, required=True)
   
+  # Localities file
   file = p.parse_args(args)
   
   with open(f"{file.f}", "r+") as locals:
@@ -23,7 +24,16 @@ def genVotante(*args) -> list(voter.Voter):
       assembly    = candidates[:mid]
       congress    = candidates[mid:]
 
+      # Se actualiza el cargo al que se postula el candidato
+      for a in assembly:
+        a.cargo = 0
+
+      for c in congress:
+        c.cargo = 1
+
+
     for v in nVoters:
       newVoter = voter.Voter(v, locality, random.choice(nCenters))
       voters.append(newVoter)
 
+  return voters
