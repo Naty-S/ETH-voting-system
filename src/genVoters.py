@@ -1,10 +1,9 @@
 import argparse, random
 
-import config.variables as vars
 import modules.Voter    as voter
 
 
-def genVotante(*args) -> list(voter.Voter):
+def genVotantes(*args) -> list(voter.Voter):
 
   voters = []
   
@@ -12,7 +11,7 @@ def genVotante(*args) -> list(voter.Voter):
   p.add_argument('-f', type=str, required=True)
   
   # Localities file
-  file = p.parse_args(args)
+  file = p.parse_args(args)[1:]
   
   with open(f"{file.f}", "r+") as locals:
     locality, nVoters, nCenters = locals.readline().split()
