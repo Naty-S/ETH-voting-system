@@ -1,2 +1,3 @@
 Local1 105 8
 Local2 106 5
+Local2 110 6
