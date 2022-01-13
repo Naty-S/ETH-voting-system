@@ -12,4 +12,4 @@ def centroVotacion(*args):
   myArgs = p.parse_args(args)
   centerName, port = myArgs.n, myArgs.p
 
-  center.Center(centerName, "", port)
+  center.Center(centerName, 0, port)

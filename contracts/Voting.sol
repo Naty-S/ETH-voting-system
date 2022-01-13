@@ -6,23 +6,12 @@ contract Voting {
 
   enum State { Created, Voting, Closed }
 
-  enum Cargo{
-    Asamblea, // 0
-    Congreso // 1
-  }
-
   struct Locality {
-    bytes32 name;
-    uint centers; // number of voting centers
+    uint name;
     uint voters;  // number of voters
     uint votes;   // votes made
   }
 
-  struct Center {
-    uint name;
-    uint locality; // index
-  }
-  
   struct Voter {
     bytes32 name;
     bool voted;
@@ -30,11 +19,14 @@ contract Voting {
   }
   
   struct Candidate {
+    bytes32 name;
     uint votes;
-    Cargo cargo;
+    uint cargo; // Asamblea = 0, Congreso = 1
   }
 
+  // Votes done in the voting process
   uint public totalVotes;
+  // State of the contract
   State public state;
   Locality[] public localities;
 
@@ -42,7 +34,7 @@ contract Voting {
   Candidate[] public assemblyReps;
   Candidate[] public congressReps;
   
-  // Index locality to candidate
+  // Given the index in localities, returns its candidates
   mapping(uint => Candidate[]) public assemblyCandidates;
   mapping(uint => Candidate[]) public congressCandidates;
 
@@ -91,9 +83,9 @@ contract Voting {
   }
 
 
-  function registerLocality(bytes32 _name, uint _voters, uint _centers) public inState(State.Created) {
+  function registerLocality(uint _name, uint _voters) public inState(State.Created) {
 
-    localities.push(Locality(_name, _centers, _voters, 0));
+    localities.push(Locality(_name, _voters, 0));
   }
 
 
@@ -106,7 +98,7 @@ contract Voting {
   }
   
 
-  function registerCandidate(address _candidate, uint _cargo, uint _locality) public inState(State.Created) {
+  function registerCandidate(address _candidate, bytes32 _name, uint _cargo, uint _locality) public inState(State.Created) {
     
     require(_locality < localities.length, "La localidad no existe");
     require(_cargo == 0 || _cargo == 1, "Solo se puede votar por representante de Asamblea o Congreso");
@@ -121,11 +113,7 @@ contract Voting {
     }
     require(candidateIsValid, "El candidato debe ser un votante valido");
 
-    if (_cargo == 0) {
-      assemblyCandidates[_locality].push(Candidate(0, Cargo.Asamblea));
-    } else {
-      congressCandidates[_locality].push(Candidate(0, Cargo.Congreso));
-    }
+    assemblyCandidates[_locality].push(Candidate(_name, 0, _cargo));
   }
 
 
