@@ -1,13 +1,15 @@
+#!/usr/bin/python3
 import argparse, random
 import brownie as br
-from typing import Tuple
 
-import modules.Voter    as voter
+import scripts.modules.Voter as voter
+import scripts.config.vars   as vars
 
 
-def genVotantes(*args) -> Tuple(list(voter.Voter), dict(int, list(voter.Voter))):
+def genVotantes(*args): # -> tuple(list(voter.Voter), dict(int, list(voter.Voter))):
 
   voters = []
+  localities = []
 
   # Candidates by locality, each position represents a locality
   assemblyCandidates = []
@@ -22,19 +24,22 @@ def genVotantes(*args) -> Tuple(list(voter.Voter), dict(int, list(voter.Voter)))
   with open(f"{file.f}", "r+") as locals:
 
     locality, nVoters, nCenters = locals.readline().split()
+    localities.append((nVoters, int(nCenters)))
 
     # Select candidates for the locality, when read another
-    if (len(voters) > 0):
+    votersLen = len(voters)
+    if (votersLen > 0):
       
-      nCandidates = nVoters * 0.01 if nVoters > 100 else 2
-      candidates  = random.choices(voters, k=nCandidates)
+      nCandidates = int(nVoters) * 0.01 if int(nVoters) > 100 else 2
+      lCandidates = [v.__dict__ for v in voters[votersLen - 1:]]
+      candidates  = random.choices(lCandidates, k=nCandidates)
       mid         = len(candidates) // 2
       assemblyCandidates.append(candidates[:mid])
       congressCandidates.append(candidates[mid:])
 
 
-    for v in nVoters:
-      newVoter = voter.Voter(v, locality, random.choice(nCenters))
+    for v in range(int(nVoters)):
+      newVoter = voter.Voter(v, int(locality[-1]), random.choice(int(nCenters)))
       
       # Creates new account for voter and fund it
       newAcc           = br.accounts.add(newVoter.privKey)
@@ -44,4 +49,4 @@ def genVotantes(*args) -> Tuple(list(voter.Voter), dict(int, list(voter.Voter)))
       voters.append(newVoter)
 
 
-  return (voters, {0: assemblyCandidates, 1: congressCandidates})
+  return (localities, voters, {1: assemblyCandidates, 2: congressCandidates})

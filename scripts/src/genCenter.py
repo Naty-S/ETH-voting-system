@@ -1,8 +1,10 @@
+#!/usr/bin/python3
 import argparse
 
-import modules.Center as center
+import scripts.modules.Center as center
 
-def centroVotacion(*args):
+
+def centroVotacion(*args) -> None:
 
   p = argparse.ArgumentParser()
   p.add_argument('-n', type=int, required=True)
@@ -12,4 +14,4 @@ def centroVotacion(*args):
   myArgs = p.parse_args(args)
   centerName, port = myArgs.n, myArgs.p
 
-  center.Center(centerName, 0, port)
+  center.Center(centerName, port)
