@@ -39,7 +39,7 @@ def genVotantes(*args): # -> tuple(list(voter.Voter), dict(int, list(voter.Voter
 
 
     for v in range(int(nVoters)):
-      newVoter = voter.Voter(v, int(locality[-1]), random.choice(int(nCenters)))
+      newVoter = voter.Voter(v, int(locality.partition('l')[2]), random.choice(int(nCenters)))
       
       # Creates new account for voter and fund it
       newAcc           = br.accounts.add(newVoter.privKey)
