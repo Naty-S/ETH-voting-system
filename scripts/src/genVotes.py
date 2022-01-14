@@ -1,26 +1,83 @@
-import argparse
+#!/usr/bin/python3
+import random, socket, threading
+from os import abort
 
-import modules.Voter    as voter
+import scripts.config.vars   as vars
 
 
-def genVotos(voters: list(voter.Voter), *args):
+# Voters with abstention
+trueVoters = []
 
-  p = argparse.ArgumentParser()
-  p.add_argument('-n', type=str, required=True)
-  p.add_argument('-nc', type=int, required=True)
+def genVotos(localities, voters, candidates, centersFile, concurrency) -> None:
+
+  centersPorts  = []
+  votingThreads = []
+  global trueVoters
+  # Total centers by locality
+  locsNcenters  = [ l[1] for l in localities ]
+  centersFile   = open(f"{centersFile}", "r+")
+  totalCenters  = centersFile.readline()
+
+  for c in centersFile.readlines():
+    _, centerPort = c.split()
+    centersPorts.append(int(centerPort))
   
-  myArgs = p.parse_args(args)
-  centersFile, concurrency = myArgs.n, myArgs.nc
+  centersFile.close()
 
-  centers = open(f"{centersFile}", "r+")
-  totalCenters = centers.readline()
-
-  for c in centers[1:]:
-    centerName, centerPort = c.split()
+  locI = 0
+  for loc in localities:
+    locAbstention = loc[0] * random.randrange(1, 4) // 10
+    locVoters     = [ v for v in voters if v.locality == locI ]
+    trueLocVoter  = random.sample(locVoters, k= len(locVoters) - locAbstention)
+    trueVoters.append(trueLocVoter)
   
-  centers.close()
+    locI += 1
 
-  # Wait for center1 to initialize scenario
+  # Join in one list
+  trueVoters = sum(trueVoters, [])
 
-  for v in voters:
-    v.center
+  for c in range(concurrency):
+    voteArgs = (locsNcenters, centersPorts, candidates)
+    thread   = threading.Thread(name="voterT-" + str(c), target=_votingThread, args=voteArgs)
+    votingThreads.append(thread)
+  
+  for vt in votingThreads:
+    vt.start()
+
+  for vt in votingThreads:
+    vt.join()
+
+
+def _votingThread(locsNcenters, centers, candidates):
+  
+  global trueVoters
+  
+  for v in trueVoters:
+    _vote(locsNcenters, centers, v, candidates)
+
+
+def _vote(locsNcenters, centers, voter, candidates):
+
+  assert(vars.scenaryInit)
+
+  print("\n\tStarting voting...\n")
+
+  s              = socket.socket()
+  loc            = voter.locality
+  prevNcenters   = locsNcenters[loc - 2 if loc > 1 else 0]
+  center         = voter.center
+  port           = centers[prevNcenters + center - 1 if loc > 1 else center - 1]
+  assemblyChoice = random.randrange(len(candidates[0][loc]))
+  congressChoice = random.randrange(len(candidates[1][loc]))
+  vote           = str((voter.address, assemblyChoice, congressChoice)).encode()
+
+  print(f"\n\tConecting to {port}...\n")
+  s.connect((b'localhost', port))
+
+  print(f"\n\tEnviando voto: {vote}...\n")
+  s.send(vote)
+
+  # Wait to finish
+  s.recv(512)
+  
+  s.close()

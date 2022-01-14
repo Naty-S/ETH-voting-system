@@ -1,4 +1,4 @@
-19
+10
 Centro1 5001
 Centro2 5002
 Centro3 5003
@@ -8,13 +8,4 @@ Centro6 5006
 Centro7 5007
 Centro8 5008
 Centro9 5009
-Centro10 50010
-Centro11 50011
-Centro12 50012
-Centro13 50013
-Centro14 50014
-Centro15 50015
-Centro16 50016
-Centro17 50017
-Centro18 50018
-Centro19 50019
+Centro10 5010

@@ -4,7 +4,7 @@ import argparse
 import scripts.modules.Center as center
 
 
-def centroVotacion(*args) -> None:
+def centroVotacion(*args) -> center.Center:
 
   p = argparse.ArgumentParser()
   p.add_argument('-n', type=int, required=True)
@@ -14,4 +14,6 @@ def centroVotacion(*args) -> None:
   myArgs = p.parse_args(args)
   centerName, port = myArgs.n, myArgs.p
 
-  center.Center(centerName, port)
+  print(f"\n\tStarting center {centerName}\n")
+  
+  return center.Center(centerName, port)

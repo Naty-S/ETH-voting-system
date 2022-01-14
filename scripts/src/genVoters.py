@@ -3,10 +3,9 @@ import argparse, random
 import brownie as br
 
 import scripts.modules.Voter as voter
-import scripts.config.vars   as vars
 
 
-def genVotantes(*args): # -> tuple(list(voter.Voter), dict(int, list(voter.Voter))):
+def genVotantes(*args):
 
   voters = []
   localities = []
@@ -19,34 +18,47 @@ def genVotantes(*args): # -> tuple(list(voter.Voter), dict(int, list(voter.Voter
   p.add_argument('-f', type=str, required=True)
   
   # Localities file
-  file = p.parse_args(args)[1:]
+  file = p.parse_args(args)
   
-  with open(f"{file.f}", "r+") as locals:
+  locals = open(f"{file.f[1:]}", "r+")
 
-    locality, nVoters, nCenters = locals.readline().split()
-    localities.append((nVoters, int(nCenters)))
+  for l in locals:
 
-    # Select candidates for the locality, when read another
-    votersLen = len(voters)
-    if (votersLen > 0):
+    line     = l.split()
+    locality = line[0]
+    nVoters  = int(line[1])
+    nCenters = int(line[2])
+    loc      = int(locality.partition('l')[2])
+
+    localities.append((nVoters, nCenters))
+    
+    print(f"\n\tReading {locality}...\n")
+
+    for v in range(nVoters):
       
-      nCandidates = int(nVoters) * 0.01 if int(nVoters) > 100 else 2
-      lCandidates = [v.__dict__ for v in voters[votersLen - 1:]]
-      candidates  = random.choices(lCandidates, k=nCandidates)
-      mid         = len(candidates) // 2
-      assemblyCandidates.append(candidates[:mid])
-      congressCandidates.append(candidates[mid:])
-
-
-    for v in range(int(nVoters)):
-      newVoter = voter.Voter(v, int(locality.partition('l')[2]), random.choice(int(nCenters)))
+      center   = random.randrange(1, nCenters)
+      newVoter = voter.Voter(v + len(voters), loc, center)
       
-      # Creates new account for voter and fund it
+      # Creates new account for voter and fund it from miner account
       newAcc           = br.accounts.add(newVoter.privKey)
       newVoter.address = newAcc.address
-      br.accounts[random.choice(9)].transfer(newAcc, 10000000, required_confs=0, gas_price="1 gwei")
+
+      print("\n\tFunding new voter account...\n")
+      br.accounts[0].transfer(newAcc, 10000000, required_confs=0, gas_price="1 gwei")
       
       voters.append(newVoter)
 
+    # Select candidates for the locality
+    nCandidates = nVoters * 0.01 if nVoters > 100 else 2
+    locVoters   = voters if loc == 1 else voters[len(voters) - nVoters:]
+    lCandidates = [v.__dict__ for v in locVoters]
+    candidates  = random.sample(lCandidates, nCandidates)
+    mid         = len(candidates) // 2
 
-  return (localities, voters, {1: assemblyCandidates, 2: congressCandidates})
+    assemblyCandidates.append(candidates[:mid])
+    congressCandidates.append(candidates[mid:])
+
+
+  print("\n\tVoters created...\n")
+
+  return (localities, voters, (assemblyCandidates, congressCandidates))

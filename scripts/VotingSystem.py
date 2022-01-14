@@ -1,37 +1,39 @@
 #!/usr/bin/python3
-import brownie as br
+import scripts.config.vars    as vars
 
-from scripts.src.genCenter import centroVotacion
-from scripts.src.genVoters import genVotantes
-from scripts.src.genVotes  import genVotos
-from scripts.src.register  import register
+from scripts.src.genCenter  import centroVotacion
+from scripts.src.genVoters  import genVotantes
+from scripts.src.genVotes   import genVotos
+from scripts.src.register   import register
+from scripts.src.visualizer import visualizer
 
 
 def main():
 
-  localities, voters, candidates = genVotantes("-f ../data/localities.txt")
+  localities, voters, candidates = genVotantes("-f scripts/data/localidades.txt")
   
-  centroVotacion("-n 1 -p 5001")
-  centroVotacion("-n 2 -p 5002")
-  centroVotacion("-n 3 -p 5003")
-  centroVotacion("-n 4 -p 5004")
-  centroVotacion("-n 5 -p 5005")
-  centroVotacion("-n 6 -p 5006")
-  centroVotacion("-n 7 -p 5007")
-  centroVotacion("-n 8 -p 5008")
-  centroVotacion("-n 9 -p 5009")
-  centroVotacion("-n 10 -p 5010")
-  centroVotacion("-n 11 -p 5011")
-  centroVotacion("-n 12 -p 5012")
-  centroVotacion("-n 13 -p 5013")
-  centroVotacion("-n 14 -p 5014")
-  centroVotacion("-n 15 -p 5015")
-  centroVotacion("-n 16 -p 5016")
-  centroVotacion("-n 17 -p 5017")
-  centroVotacion("-n 18 -p 5018")
-  centroVotacion("-n 19 -p 5019")
+  centers = []
+  centers.append(centroVotacion("-n 1", "-p 5001"))
+  centers.append(centroVotacion("-n 2", "-p 5002"))
+  centers.append(centroVotacion("-n 3", "-p 5003"))
+  centers.append(centroVotacion("-n 4", "-p 5004"))
+  centers.append(centroVotacion("-n 5", "-p 5005"))
+  centers.append(centroVotacion("-n 6", "-p 5006"))
+  centers.append(centroVotacion("-n 7", "-p 5007"))
+  centers.append(centroVotacion("-n 8", "-p 5008"))
+  centers.append(centroVotacion("-n 9", "-p 5009"))
+  centers.append(centroVotacion("-n 10", "-p 5010"))
 
   register(localities, candidates, [v.__dict__ for v in voters])
 
-  genVotos(voters, "-n ../data/centros.txt -nc 3")
-  
+  vars.Voting.startVoting()
+
+  genVotos(localities, voters, candidates, "scripts/data/centros.txt", 1)
+
+  vars.Voting.closeVoting()
+        
+  visualizer()
+
+  vars.Voting.reset()
+
+  exit()
