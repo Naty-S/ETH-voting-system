@@ -11,16 +11,16 @@ def visualizer():
   
   for i in range(len(assemblyRepsVotesR)):
     print(f"\nLocalidad {i}:\n\
-      % Votos representante de asamblea '{(assemblyRepsR[i]).decode()}': {assemblyRepsVotesR[i]}\n\
-      % Votos representante de congreso '{(congressRepsR[i]).decode()}': {congressRepsVotesR[i]}\n\
-      % Abtinencias: {abstentionsR[i]}\
+      El ganador a representante de asamblea '{(assemblyRepsR[i]).decode()}' recibio {assemblyRepsVotesR[i]}% de los votos\n\
+      El ganador a representante de congreso '{(congressRepsR[i]).decode()}' recibio {congressRepsVotesR[i]}% de los votos\n\
+      Abtinencias: {abstentionsR[i]}%\
     \n")
   
   print("\nReporte:")
   
   for i in range(len(assemblyRepsVotes)):
     print(f"\nLocalidad {i}:\n\
-      Votos representante de asamblea '{(assemblyReps[i]).decode()}': {assemblyRepsVotes[i]}\n\
-      Votos representante de congreso '{(congressReps[i]).decode()}': {congressRepsVotes[i]}\n\
+      El ganador a representante de asamblea '{(assemblyReps[i]).decode()}' recibio {assemblyRepsVotes[i]} votos\n\
+      El ganador a representante de congreso '{(congressReps[i]).decode()}' recibio {congressRepsVotes[i]} votos\n\
       Abtinencias: {abstentions[i]}\
     \n")

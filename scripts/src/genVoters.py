@@ -9,6 +9,7 @@ def genVotantes(*args):
 
   voters = []
   localities = []
+  loc = 0
 
   # Candidates by locality, each position represents a locality
   assemblyCandidates = []
@@ -19,7 +20,6 @@ def genVotantes(*args):
   
   # Localities file
   file = p.parse_args(args)
-  
   locals = open(f"{file.f[1:]}", "r+")
 
   for l in locals:
@@ -28,7 +28,6 @@ def genVotantes(*args):
     locality = line[0]
     nVoters  = int(line[1])
     nCenters = int(line[2])
-    loc      = int(locality.partition('l')[2])
 
     localities.append((nVoters, nCenters))
     
@@ -49,14 +48,16 @@ def genVotantes(*args):
       voters.append(newVoter)
 
     # Select candidates for the locality
-    nCandidates = nVoters * 0.01 if nVoters > 100 else 2
-    locVoters   = voters if loc == 1 else voters[len(voters) - nVoters:]
+    nCandidates = nVoters * 0.01 if nVoters > 100 else 4
+    locVoters   = voters if loc == 0 else voters[len(voters) - nVoters:]
     lCandidates = [v.__dict__ for v in locVoters]
     candidates  = random.sample(lCandidates, nCandidates)
     mid         = len(candidates) // 2
 
     assemblyCandidates.append(candidates[:mid])
     congressCandidates.append(candidates[mid:])
+
+    loc += 1
 
 
   print("\n\tVoters created...\n")

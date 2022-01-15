@@ -55,7 +55,6 @@ def _votingThread(locsNcenters, centers, candidates):
   for v in trueVoters:
     _vote(locsNcenters, centers, v, candidates)
 
-
 def _vote(locsNcenters, centers, voter, candidates):
 
   assert(vars.scenaryInit)

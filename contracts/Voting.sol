@@ -30,11 +30,11 @@ contract Voting {
   State public state;
   Locality[] public localities;
 
-  // Winners by locality, each index represents a locality
+  // Winners by locality
   Candidate[] public assemblyReps;
   Candidate[] public congressReps;
   
-  // Given the index in localities, returns its candidates
+  // Mapping from the locality number to get its candidates
   mapping(uint => Candidate[]) public assemblyCandidates;
   mapping(uint => Candidate[]) public congressCandidates;
 
@@ -71,7 +71,7 @@ contract Voting {
   }
 
 
-  function reset() public {
+  function reset() public inState(State.Closed) {
     
     state = State.Created;
     totalVotes = 0;
@@ -203,6 +203,7 @@ contract Voting {
       bytes32[] memory congressRepsNames
     )
   {
+    uint[] memory votersVoted = new uint[](localities.length);
     assemblyRepsVotes = new uint[](localities.length);
     congressRepsVotes = new uint[](localities.length);
     abstentions       = new uint[](localities.length);
@@ -210,10 +211,20 @@ contract Voting {
     congressRepsNames = new bytes32[](localities.length);
 
     for (uint i = 0; i < localities.length; i++) {
+      uint locValidVoters = 0;
+      for (uint j = 0; j < validVoters.length; j++) {
+        if (validVoters[j].voted && validVoters[j].locality == localities[i].name) {
+          locValidVoters += 1;
+        }
+      }
+      votersVoted[i] = locValidVoters;
+    }
 
-      assemblyRepsVotes[i] = assemblyReps[i].votes * 100 / localities[i].voters;
-      congressRepsVotes[i] = congressReps[i].votes * 100 / localities[i].voters;
-      abstentions[i]       = ((localities[i].voters - localities[i].votes) * 100) / localities[i].voters;
+    for (uint i = 0; i < localities.length; i++) {
+
+      assemblyRepsVotes[i] = assemblyReps[i].votes / localities[i].votes * 100;
+      congressRepsVotes[i] = congressReps[i].votes / localities[i].votes * 100;
+      abstentions[i]       = votersVoted[i] / localities[i].voters * 100;
       assemblyRepsNames[i] = assemblyReps[i].name;
       congressRepsNames[i] = congressReps[i].name;
     }
